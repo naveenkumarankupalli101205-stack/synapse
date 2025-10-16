@@ -1,14 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../lib/mockAuth';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
 import { Button } from '@/components/ui/button';
 import { LogOut, BookOpen } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await signOut();
+    navigate('/');
   };
 
   return (
@@ -16,9 +18,9 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to={user?.role === 'teacher' ? '/teacher' : '/student'} className="flex items-center space-x-2">
+            <Link to={user?.role === 'teacher' ? '/teacher-dashboard' : '/student-dashboard'} className="flex items-center space-x-2">
               <BookOpen className="h-8 w-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">EduLMS</span>
+              <span className="text-xl font-bold text-gray-900">SmartLearn</span>
             </Link>
           </div>
 

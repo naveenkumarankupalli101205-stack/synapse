@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { useAuth } from '../lib/mockAuth';
+import { useAuth } from '../lib/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,25 +36,6 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleDemoLogin = async (role: 'teacher' | 'student') => {
-    setLoading(true);
-    const demoEmail = role === 'teacher' ? 'teacher@demo.com' : 'student@demo.com';
-    const demoPassword = 'demo123';
-    
-    try {
-      const { error } = await signIn(demoEmail, demoPassword);
-      if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success(`Welcome back, ${role}!`);
-      }
-    } catch (error) {
-      toast.error('An error occurred during login');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -62,7 +43,7 @@ const Login: React.FC = () => {
           <div className="flex justify-center">
             <BookOpen className="h-12 w-12 text-blue-600" />
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">EduLMS</h2>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">SmartLearn</h2>
           <p className="mt-2 text-sm text-gray-600">Sign in to your account</p>
         </div>
 
@@ -103,34 +84,6 @@ const Login: React.FC = () => {
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
             </form>
-
-            {/* Demo Login Buttons */}
-            <div className="mt-6 space-y-3">
-              <div className="text-center text-sm text-gray-600 font-medium">
-                Demo Accounts
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => handleDemoLogin('teacher')}
-                  disabled={loading}
-                  className="text-sm"
-                >
-                  Teacher Demo
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => handleDemoLogin('student')}
-                  disabled={loading}
-                  className="text-sm"
-                >
-                  Student Demo
-                </Button>
-              </div>
-              <div className="text-xs text-gray-500 text-center">
-                Use demo accounts to explore the system
-              </div>
-            </div>
 
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600">

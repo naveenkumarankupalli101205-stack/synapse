@@ -2,8 +2,9 @@ import { Toaster } from 'react-hot-toast';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './lib/mockAuth';
+import { AuthProvider, useAuth } from './lib/auth';
 import ProtectedRoute from './components/ProtectedRoute';
+import LandingPage from './pages/Index';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import TeacherDashboard from './pages/TeacherDashboard';
@@ -27,13 +28,25 @@ const AppRoutes = () => {
 
   return (
     <Routes>
+      {/* Landing page */}
+      <Route
+        path="/"
+        element={
+          user ? (
+            <Navigate to={user.role === 'teacher' ? '/teacher-dashboard' : '/student-dashboard'} replace />
+          ) : (
+            <LandingPage />
+          )
+        }
+      />
+
       {/* Public routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      
+      <Route path="/login" element={user ? <Navigate to={user.role === 'teacher' ? '/teacher-dashboard' : '/student-dashboard'} replace /> : <Login />} />
+      <Route path="/register" element={user ? <Navigate to={user.role === 'teacher' ? '/teacher-dashboard' : '/student-dashboard'} replace /> : <Register />} />
+
       {/* Protected routes */}
       <Route
-        path="/teacher"
+        path="/teacher-dashboard"
         element={
           <ProtectedRoute requiredRole="teacher">
             <TeacherDashboard />
@@ -41,7 +54,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/student"
+        path="/student-dashboard"
         element={
           <ProtectedRoute requiredRole="student">
             <StudentDashboard />
@@ -64,19 +77,11 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
-      
-      {/* Root redirect */}
-      <Route
-        path="/"
-        element={
-          user ? (
-            <Navigate to={user.role === 'teacher' ? '/teacher' : '/student'} replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      
+
+      {/* Legacy routes - redirect to new routes */}
+      <Route path="/teacher" element={<Navigate to="/teacher-dashboard" replace />} />
+      <Route path="/student" element={<Navigate to="/student-dashboard" replace />} />
+
       {/* 404 page */}
       <Route path="*" element={<NotFound />} />
     </Routes>

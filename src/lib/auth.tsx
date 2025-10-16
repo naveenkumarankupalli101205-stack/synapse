@@ -6,9 +6,10 @@ import { User } from '../types';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string, name: string, role: 'student' | 'teacher') => Promise<{ error: AuthError | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
+  signUp: (email: string, password: string, name: string, role: 'student' | 'teacher') => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -98,15 +99,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { error };
+      }
+
+      if (data.user && !data.user.email_confirmed_at) {
+        await supabase.auth.signOut();
+        return { error: { message: 'Please verify your email before signing in. Check your inbox for the verification link.' } };
+      }
+
+      return { error: null };
+    } catch (error) {
+      return { error: { message: 'Login failed' } };
+    }
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      return { error };
+    } catch (error) {
+      return { error: { message: 'Password reset failed' } };
+    }
   };
 
   const value = {
@@ -115,6 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signIn,
     signOut,
+    resetPassword,
   };
 
   return (
